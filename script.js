@@ -24,21 +24,46 @@ async function loadData() {
   }
 }
 
-function formatSummary(value) {
+function formatSummary(value, sectionKey) {
   if (Array.isArray(value)) {
+    if (!value.length) return "点击查看详细内容";
+    const summaries = value
+      .map((item) => item.summary || item.title || '')
+      .filter(Boolean);
+    if (summaries.length) {
+      const combined = summaries.join('； ');
+      return combined.length > 120 ? `${combined.slice(0, 117)}...` : combined;
+    }
     const firstItem = value[0];
-    if (!firstItem) return "点击查看详细内容";
-    return firstItem.title || (typeof firstItem.content === 'string' ? firstItem.content.split("\n")[0] : "点击查看详细内容");
+    if (firstItem.summary) {
+      return firstItem.summary;
+    }
+    const title = firstItem.title || '';
+    const duration = firstItem.duration ? ` · ${firstItem.duration}` : '';
+    if (sectionKey === 'competitionExperience') {
+      const content = typeof firstItem.content === 'string' ? firstItem.content.split("\n")[0] : '';
+      return `${title}${content ? ` · ${content}` : ''}`.trim() || "点击查看详细内容";
+    }
+    return `${title}${duration}`.trim() || (typeof firstItem.content === 'string' ? firstItem.content.split("\n")[0] : "点击查看详细内容");
   }
   if (typeof value === 'object' && value !== null) {
-    return value.title || (typeof value.content === 'string' ? value.content.split("\n")[0] : "点击查看详细内容");
+    if (value.summary) {
+      return value.summary;
+    }
+    const title = value.title || '';
+    const content = typeof value.content === 'string' ? value.content.split("\n")[0] : '';
+    if (sectionKey === 'techStack') {
+      return content || title || "点击查看详细内容";
+    }
+    return title || content || "点击查看详细内容";
   }
   if (typeof value === 'string') {
     const lines = value.trim().split("\n").filter(Boolean);
     if (!lines.length) {
       return "点击查看详细内容";
     }
-    return lines[0].length > 45 ? `${lines[0].slice(0, 45)}...` : lines[0];
+    const first = lines[0];
+    return first.length > 80 ? `${first.slice(0, 80)}...` : first;
   }
   return "点击查看详细内容";
 }
@@ -88,7 +113,7 @@ function renderItemList(value, containerId, sectionKey, defaultLabel) {
 function updateSection(key, value) {
   const summaryElement = getElement(`summary-${key}`);
   const detailContent = getElement(`content-${key}`);
-  summaryElement.textContent = formatSummary(value);
+  summaryElement.textContent = formatSummary(value, key);
   if (detailContent) {
     detailContent.textContent = typeof value === 'string' ? value : '';
   }
