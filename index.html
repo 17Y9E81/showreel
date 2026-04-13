@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>后端开发程序员作品集</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero-card">
+      <div>
+        <p class="eyebrow">后端开发作品集</p>
+        <h1>张佳烨</h1>
+        <p>专注后端系统、嵌入式网络与算法优化，具备 Linux 路由器系统与 AI Agent 开发经验</p>
+      </div>
+    </header>
+
+    <main class="content-grid">
+      <section class="panel card" data-key="workExperience">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">工作经历</p>
+            <h2>工作经历</h2>
+          </div>
+          <button class="secondary-button toggle-detail" data-key="workExperience">查看详情</button>
+        </div>
+        <p class="panel-summary" id="summary-workExperience">点击查看详细内容</p>
+        <div class="panel-detail hidden" id="detail-workExperience">
+          <div class="project-item-list" id="workItems"></div>
+        </div>
+      </section>
+
+      <section class="panel card" data-key="projectExperience">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">项目经历</p>
+            <h2>项目经历</h2>
+          </div>
+          <button class="secondary-button toggle-detail" data-key="projectExperience">查看详情</button>
+        </div>
+        <p class="panel-summary" id="summary-projectExperience">点击查看详细内容</p>
+        <div class="panel-detail hidden" id="detail-projectExperience">
+          <div class="project-item-list" id="projectItems"></div>
+        </div>
+      </section>
+
+      <section class="panel card" data-key="techStack">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">技术栈</p>
+            <h2>技术栈</h2>
+          </div>
+          <button class="secondary-button toggle-detail" data-key="techStack">查看详情</button>
+        </div>
+        <p class="panel-summary" id="summary-techStack">点击查看详细内容</p>
+        <div class="panel-detail hidden" id="detail-techStack">
+          <div class="detail-content" id="content-techStack"></div>
+        </div>
+      </section>
+
+      <section class="panel card" data-key="competitionExperience">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">竞赛经历</p>
+            <h2>竞赛经历</h2>
+          </div>
+          <button class="secondary-button toggle-detail" data-key="competitionExperience">查看详情</button>
+        </div>
+        <p class="panel-summary" id="summary-competitionExperience">点击查看详细内容</p>
+        <div class="panel-detail hidden" id="detail-competitionExperience">
+          <div class="project-item-list" id="competitionItems"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
