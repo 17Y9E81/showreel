@@ -17,22 +17,59 @@ async function loadData() {
     if (!response.ok) {
       throw new Error('无法加载 data.json');
     }
-    return await response.json();
+    const data = await response.json();
+    if (Array.isArray(data.projectExperience)) {
+      data.projectExperience = sortByDurationDesc(data.projectExperience);
+    }
+    return data;
   } catch (error) {
     console.warn('加载 data.json 失败，使用默认数据', error);
     return DEFAULTS;
   }
 }
 
+function parseDuration(duration) {
+  if (typeof duration !== 'string') return null;
+  const range = duration.split(/[-–—]/).map((part) => part.trim());
+  const endPart = range[range.length - 1];
+  if (/至今|now|present|ongoing/i.test(endPart)) {
+    return '9999-12';
+  }
+  const match = /^(\d{4})(?:[.\-](\d{1,2}))?/.exec(endPart);
+  if (!match) return null;
+  const year = match[1];
+  const month = match[2] ? match[2].padStart(2, '0') : '12';
+  return `${year}-${month}`;
+}
+
+function sortByDurationDesc(entries) {
+  return [...entries].sort((a, b) => {
+    const aEnd = parseDuration(a.duration);
+    const bEnd = parseDuration(b.duration);
+    if (aEnd && bEnd && aEnd !== bEnd) {
+      return bEnd.localeCompare(aEnd);
+    }
+    if (aEnd && !bEnd) return -1;
+    if (!aEnd && bEnd) return 1;
+    const aStart = parseDuration((a.duration || '').split(/[-–—]/)[0]);
+    const bStart = parseDuration((b.duration || '').split(/[-–—]/)[0]);
+    if (aStart && bStart) {
+      return bStart.localeCompare(aStart);
+    }
+    return 0;
+  });
+}
+
 function formatSummary(value, sectionKey) {
   if (Array.isArray(value)) {
     if (!value.length) return "点击查看详细内容";
     const summaries = value
-      .map((item) => item.summary || item.title || '')
-      .filter(Boolean);
+      .map((item) => (item.summary || item.title || '').replace(/[。．\.]+$/, ''))
+      .filter(Boolean)
+      .slice(0, 2);
     if (summaries.length) {
       const combined = summaries.join('； ');
-      return combined.length > 120 ? `${combined.slice(0, 117)}...` : combined;
+      return combined.length > 80 ? `${combined.slice(0, 77)}...` : combined;
     }
     const firstItem = value[0];
     if (firstItem.summary) {
@@ -97,7 +134,8 @@ function renderItemList(value, containerId, sectionKey, defaultLabel) {
     const title = item.title || `${defaultLabel} ${index + 1}`;
     const duration = item.duration ? `<p class="item-duration">${item.duration}</p>` : '';
     const content = typeof item.content === 'string' ? item.content : '';
-    const summary = content.replace(/\n/g, ' ').slice(0, 90) + (content.length > 90 ? '...' : '');
+    const preview = content.replace(/\n/g, ' ').trim();
+    const summary = preview.length > 80 ? `${preview.slice(0, 80)}...` : preview;
     const entry = document.createElement('div');
     entry.className = 'project-item';
     entry.innerHTML = `
