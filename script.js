@@ -13,51 +13,16 @@ function getElement(id) {
 
 async function loadData() {
   try {
-    const response = await fetch(DATA_URL);
+    const response = await fetch(DATA_URL, { cache: 'no-store' });
     if (!response.ok) {
       throw new Error('无法加载 data.json');
     }
     const data = await response.json();
-    if (Array.isArray(data.projectExperience)) {
-      data.projectExperience = sortByDurationDesc(data.projectExperience);
-    }
     return data;
   } catch (error) {
     console.warn('加载 data.json 失败，使用默认数据', error);
     return DEFAULTS;
   }
-}
-
-function parseDuration(duration) {
-  if (typeof duration !== 'string') return null;
-  const range = duration.split(/[-–—]/).map((part) => part.trim());
-  const endPart = range[range.length - 1];
-  if (/至今|now|present|ongoing/i.test(endPart)) {
-    return '9999-12';
-  }
-  const match = /^(\d{4})(?:[.\-](\d{1,2}))?/.exec(endPart);
-  if (!match) return null;
-  const year = match[1];
-  const month = match[2] ? match[2].padStart(2, '0') : '12';
-  return `${year}-${month}`;
-}
-
-function sortByDurationDesc(entries) {
-  return [...entries].sort((a, b) => {
-    const aEnd = parseDuration(a.duration);
-    const bEnd = parseDuration(b.duration);
-    if (aEnd && bEnd && aEnd !== bEnd) {
-      return bEnd.localeCompare(aEnd);
-    }
-    if (aEnd && !bEnd) return -1;
-    if (!aEnd && bEnd) return 1;
-    const aStart = parseDuration((a.duration || '').split(/[-–—]/)[0]);
-    const bStart = parseDuration((b.duration || '').split(/[-–—]/)[0]);
-    if (aStart && bStart) {
-      return bStart.localeCompare(aStart);
-    }
-    return 0;
-  });
 }
 
 function formatSummary(value, sectionKey) {
@@ -142,7 +107,7 @@ function renderItemList(value, containerId, sectionKey, defaultLabel) {
       <h3>${title}</h3>
       ${duration}
       <p>${summary}</p>
-      <p class="detail-link"><a class="detail-anchor" href="detail.html?section=${sectionKey}&item=${index + 1}">查看完整详情</a></p>
+      <p class="detail-link"><a class="detail-anchor" href="./detail.html?section=${encodeURIComponent(sectionKey)}&item=${encodeURIComponent(index + 1)}">查看完整详情</a></p>
     `;
     container.appendChild(entry);
   });

@@ -56,18 +56,27 @@ function formatDetailContent(content) {
   if (typeof content !== 'string') {
     return '';
   }
-  return content.replace(/\n/g, '<br>');
+  const anchorPlaceholders = [];
+  const placeholderToken = '___LINK_PLACEHOLDER___';
+  const protectedContent = content.replace(/<a\b[^>]*>[\s\S]*?<\/a>/gi, (match) => {
+    anchorPlaceholders.push(match);
+    return `${placeholderToken}${anchorPlaceholders.length - 1}${placeholderToken}`;
+  });
+  const linkified = protectedContent.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+  const restored = linkified.replace(new RegExp(`${placeholderToken}(\\d+)${placeholderToken}`, 'g'), (_, index) => anchorPlaceholders[Number(index)]);
+  return restored.replace(/\n/g, '<br>');
 }
 
 function renderDetail(sectionKey, itemNumber, data) {
+  const allowedSections = new Set(['projectExperience', 'workExperience', 'competitionExperience']);
   const savedValue = data[sectionKey];
   let title = SECTION_TITLES[sectionKey] || '详细内容';
   let content;
   let selectedItem = null;
-  if ((sectionKey === 'projectExperience' || sectionKey === 'workExperience' || sectionKey === 'competitionExperience') && itemNumber) {
+  if (allowedSections.has(sectionKey) && itemNumber) {
     const items = splitEntries(savedValue);
     const index = Number(itemNumber) - 1;
-    if (!items[index]) {
+    if (!Number.isInteger(index) || index < 0 || !items[index]) {
       content = '未找到对应的条目，请返回首页选择其它详情。';
     } else {
       selectedItem = items[index];
